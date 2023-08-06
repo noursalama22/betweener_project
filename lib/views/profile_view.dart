@@ -6,6 +6,8 @@ import 'package:betweener_project/models/follow.dart';
 import 'package:betweener_project/models/link.dart';
 import 'package:betweener_project/models/user.dart';
 import 'package:betweener_project/views/add_link_screen.dart';
+import 'package:betweener_project/views/update_link.dart';
+import 'package:betweener_project/views/widgets/view_follower_following.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
@@ -36,15 +38,41 @@ class _ProfileViewState extends State<ProfileView> {
         content: Text(value),
         backgroundColor: Colors.green,
       ));
-    }).catchError((onError)
-    {
+    }).catchError((onError) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(onError.toString()),
         backgroundColor: Colors.red,
       ));
     });
-     setState(() {
+    setState(() {
       links = getLinks(context);
+    });
+  }
+
+  listFollower_followee() {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) {
+        return AboutDialog();
+      },
+    ));
+  }
+
+  updateLink(int id) {
+    print('****************$id');
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) {
+        return UpdateLinkScreen(id: id);
+      },
+    )).then((value) {
+      if (value == true) {
+        links = getLinks(context);
+        print('${links}*****************');
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('updated successfully'),
+          backgroundColor: Colors.lightGreen,
+        ));
+      }
     });
   }
 
@@ -137,46 +165,52 @@ class _ProfileViewState extends State<ProfileView> {
                                         ),
                                         Row(
                                           children: [
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 4),
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                                color: kSecondaryColor,
-                                              ),
-                                              child: Text(
-                                                followinfo == null
-                                                    ? 'Loading'
-                                                    : 'followers ${followinfo!.followers_count}',
-                                                style:
-                                                    kPrimaryTextStyle.copyWith(
-                                                  fontSize: 8,
+                                            GestureDetector(
+                                              onTap: () {},
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  color: kSecondaryColor,
+                                                ),
+                                                child: Text(
+                                                  followinfo == null
+                                                      ? 'Loading'
+                                                      : 'followers ${followinfo!.followers_count}',
+                                                  style: kPrimaryTextStyle
+                                                      .copyWith(
+                                                    fontSize: 8,
+                                                  ),
                                                 ),
                                               ),
                                             ),
                                             const SizedBox(
                                               width: 4,
                                             ),
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 4),
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                                color: kSecondaryColor,
-                                              ),
-                                              child: Text(
-                                                followinfo == null
-                                                    ? 'Loading'
-                                                    : 'followering ${followinfo!.following_count}',
-                                                style:
-                                                    kPrimaryTextStyle.copyWith(
-                                                  fontSize: 8,
+                                            GestureDetector(
+                                              onTap: () {},
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  color: kSecondaryColor,
+                                                ),
+                                                child: Text(
+                                                  followinfo == null
+                                                      ? 'Loading'
+                                                      : 'followering ${followinfo!.following_count}',
+                                                  style: kPrimaryTextStyle
+                                                      .copyWith(
+                                                    fontSize: 8,
+                                                  ),
                                                 ),
                                               ),
                                             ),
@@ -219,7 +253,7 @@ class _ProfileViewState extends State<ProfileView> {
                                       ),
                                       SlidableAction(
                                         onPressed: (context) {
-                                          
+                                          updateLink(id!);
                                         },
                                         backgroundColor: kSecondaryColor,
                                         foregroundColor: Colors.white,
@@ -233,8 +267,6 @@ class _ProfileViewState extends State<ProfileView> {
                                       SlidableAction(
                                         onPressed: (context) {
                                           deleteLink(id!);
-                                          
-                                         
                                         },
                                         backgroundColor: Color(0xFFF56C61),
                                         foregroundColor: Colors.white,

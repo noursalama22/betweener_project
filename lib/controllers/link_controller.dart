@@ -62,3 +62,18 @@ Future<String> deleteLinks(int linkId) async {
     throw Exception('Delete Failed');
   }
 }
+
+Future<String> updateLinks(int linkId, body) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  User user = userFromJson(prefs.getString('user')!);
+  final response = await http.put(Uri.parse('$linksUrl/${linkId.toString()}'),
+      headers: {'Authorization': 'Bearer ${user.token}'}, body: body);
+  print('***********************${response.statusCode}');
+  if (response.statusCode == 200) {
+    print(jsonDecode(response.body)['message']);
+    return jsonDecode(response.body)['message'];
+  } else {
+    throw Exception('Update Failed');
+  }
+}

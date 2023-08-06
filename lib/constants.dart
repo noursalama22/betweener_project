@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 // endpoints==================
 const baseUrl = 'https://www.osamapro.online/api';
 const loginUrl = '$baseUrl/login';
+const registerUrl = '$baseUrl/register';
+
 const linksUrl = '$baseUrl/links';
 const searchUrl = '$baseUrl/search';
 const followUrl = '$baseUrl/follow';
