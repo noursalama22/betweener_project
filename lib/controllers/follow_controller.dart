@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:betweener_project/constants.dart';
+import 'package:betweener_project/core/utils/constants.dart';
 import 'package:betweener_project/models/follow.dart';
 import 'package:betweener_project/models/user.dart';
 import 'package:http/http.dart' as http;

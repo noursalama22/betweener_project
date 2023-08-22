@@ -1,4 +1,4 @@
-import 'package:betweener_project/constants.dart';
+import 'package:betweener_project/core/utils/constants.dart';
 import 'package:flutter/material.dart';
 
 class SecondaryButtonWidget extends StatelessWidget {
@@ -37,4 +37,5 @@ class SecondaryButtonWidget extends StatelessWidget {
       ),
     );
   }
+  
 }

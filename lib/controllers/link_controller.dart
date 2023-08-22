@@ -1,79 +1,78 @@
 import 'dart:convert';
 
-import 'package:betweener_project/constants.dart';
-import 'package:betweener_project/models/user.dart';
-import 'package:betweener_project/views/login_view.dart';
+import 'package:betweener_project/api/api_helper.dart';
+import 'package:betweener_project/core/utils/constants.dart';
+import 'package:betweener_project/models/auth_api_response.dart';
+import 'package:betweener_project/storage/shared_preference_controller.dart';
+import 'package:betweener_project/views/screens/auth/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/link.dart';
 
-Future<List<Link>> getLinks(context) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
+class LinkController with ApiHelper {
+  Future<List<Link>> getLinks(context) async {
+    //print(headers);
+    var response = await http.get(Uri.parse(linksUrl), headers: headers);
 
-  User user = userFromJson(prefs.getString('user')!);
+    // print(jsonDecode(response.body));
 
-  final response = await http.get(Uri.parse(linksUrl),
-      headers: {'Authorization': 'Bearer ${user.token}'});
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body)['links'] as List<dynamic>;
 
-  print(jsonDecode(response.body)['links']);
+      return data.map((e) => Link.fromJson(e)).toList();
+    }
 
-  if (response.statusCode == 200) {
-    final data = jsonDecode(response.body)['links'] as List<dynamic>;
+    if (response.statusCode == 401) {
+      Navigator.pushReplacementNamed(context, LoginView.id);
+    }
 
-    return data.map((e) => Link.fromJson(e)).toList();
+    return Future.error('Somthing wrong');
   }
 
-  if (response.statusCode == 401) {
-    Navigator.pushReplacementNamed(context, LoginView.id);
+  Future<bool> addNewLink(Map<String, String> body) async {
+    final response =
+        await http.post(Uri.parse(linksUrl), headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      //  final data = jsonDecode(response.body)['link'];
+      //  print(data);
+      return true;
+    } else {
+      return false;
+    }
   }
 
-  return Future.error('Somthing wrong');
-}
-
-Future<Link> addNewLink(Map<String, String> body) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-  User user = userFromJson(prefs.getString('user')!);
-  final response = await http.post(Uri.parse(linksUrl),
-      headers: {'Authorization': 'Bearer ${user.token}'}, body: body);
-
-  if (response.statusCode == 200) {
-    final data = jsonDecode(response.body)['link'];
-    print(data);
-    return Link.fromJson(data);
-  } else {
-    throw Exception('Linked not added');
+  Future<AuthApiResponse> deleteLinks(int linkId) async {
+    final response = await http
+        .delete(Uri.parse('$linksUrl/${linkId.toString()}'), headers: headers);
+    if (response.statusCode == 200) {
+      return AuthApiResponse(
+          message: jsonDecode(response.body)['message'], status: true);
+    } else if (response.statusCode == 404) {
+      return AuthApiResponse(message: 'Delete Failed', status: false);
+    } else {
+      return errorServerResponse;
+    }
   }
-}
 
-Future<String> deleteLinks(int linkId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-  User user = userFromJson(prefs.getString('user')!);
-  final response = await http.delete(
-      Uri.parse('$linksUrl/${linkId.toString()}'),
-      headers: {'Authorization': 'Bearer ${user.token}'});
-  print('***********************${response.statusCode}');
-  if (response.statusCode == 200) {
-    return jsonDecode(response.body)['message'];
-  } else {
-    throw Exception('Delete Failed');
-  }
-}
-
-Future<String> updateLinks(int linkId, body) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-  User user = userFromJson(prefs.getString('user')!);
-  final response = await http.put(Uri.parse('$linksUrl/${linkId.toString()}'),
-      headers: {'Authorization': 'Bearer ${user.token}'}, body: body);
-  print('***********************${response.statusCode}');
-  if (response.statusCode == 200) {
-    print(jsonDecode(response.body)['message']);
-    return jsonDecode(response.body)['message'];
-  } else {
-    throw Exception('Update Failed');
+//200 "message": "updated successfully"
+  // 401     "message": "unauthenticated"
+  // 404
+  Future<String> updateLinks(int linkId,
+      {required title, required link}) async {
+    final response = await http.put(Uri.parse('$linksUrl/${linkId.toString()}'),
+        headers: headers,
+        body: {
+          'title': title,
+          'username': SharedPreferenceController().getCurrentUser().user!.name
+        });
+    print('***********************${response.statusCode}');
+    if (response.statusCode == 200) {
+      print(jsonDecode(response.body)['message']);
+      return jsonDecode(response.body)['message'];
+    } else {
+      throw Exception('Update Failed');
+    }
   }
 }
